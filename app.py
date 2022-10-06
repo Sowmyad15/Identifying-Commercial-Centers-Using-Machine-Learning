@@ -1,7 +1,6 @@
 import pandas as pd
 import streamlit as st
 from cluster_model import *
-import config
 from streamlit_folium import folium_static
 
 
@@ -10,7 +9,7 @@ st.markdown("This project focuses on identifying commercial centers")
 
 city = st.text_input('Enter City Name:')
 if city:
-        with st.spinner("Fetching City Dta"):
+        with st.spinner("Fetching City Data"):
             try:
                 df=fetch_city_data(city)
 

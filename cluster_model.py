@@ -1,29 +1,36 @@
 import pandas as pd
 import numpy as np
-import config
 import json
 import overpy
 from sklearn.cluster import KMeans,DBSCAN
 from convex_hull import *
-from streamlit_folium import st_folium
+import config
+from maplegend import *
+
 import plotly.express as px
 import folium
+from folium import plugins 
+
+
 api = overpy.Overpass()
 
-
+#Get City details
 def fetch_city_data(city_name):
    
-    res = api.query("""[out:json];
-    area[name="""+city_name+"""][boundary=administrative]->.searchArea;
+    res = api.query(f"""[out:json];
+    area[name='{city_name}'][boundary=administrative]->.searchArea;
     (node["amenity"](area.searchArea);
     way["amenity"](area.searchArea);
         relation["amenity"](area.searchArea);
         );
-    out center;
+    (._;
+    >;
+    );
+    out;
     """)
     return reduce(res)
 
-
+#Remove unnecessary amenity
 def reduce(res):
     tags = []
     for i in res.nodes:
@@ -136,9 +143,24 @@ def cluster_coords(Kn):
 
 def mapplot(most_significant,least_significant,coords1):
     map_osm = folium.Map(location=coords1[0])
+    #Add Plugins
+    # add tiles to map, Create a tile layer to append on a Map
+    folium.raster_layers.TileLayer('Open Street Map').add_to(map_osm)
+    folium.raster_layers.TileLayer('Stamen Terrain').add_to(map_osm)
+    folium.raster_layers.TileLayer('Stamen Toner').add_to(map_osm)
+    folium.raster_layers.TileLayer('Stamen Watercolor').add_to(map_osm)
+    folium.raster_layers.TileLayer('CartoDB Positron').add_to(map_osm)
+    folium.raster_layers.TileLayer('CartoDB Dark_Matter').add_to(map_osm)
+    # add layer control to show different maps
+    folium.LayerControl().add_to(map_osm)
+    minimap = plugins.MiniMap(toggle_display=True,position='bottomleft')
+    # add minimap to map
+    map_osm.add_child(minimap)
+    # add full screen button to map
+    plugins.Fullscreen(position='topright').add_to(map_osm)
     # create a polygon with the coordinates
     for cords in coords1:
-        folium.CircleMarker(location=[cords[0], cords[1]],radius=2,weight=2).add_to(map_osm)
+        folium.CircleMarker(location=[cords[0], cords[1]],radius=1,color='blue').add_to(map_osm)
     for i in range(len(least_significant)):
         folium.Polygon(least_significant[i],
                color="blue",
@@ -149,14 +171,22 @@ def mapplot(most_significant,least_significant,coords1):
 
     for i in range(len(most_significant)):
         folium.Polygon(most_significant[i],
-               color="blue",
+               color="black",
                weight=2,
                fill=True,
                fill_color="red",
                fill_opacity=0.4).add_to(map_osm)
+
+    #Legend
+    
+    macro=temp()
+
+    map_osm.add_child(macro)
+
     return map_osm
 
 def amenity_df(df):
+    #Group the amenity
     food_list = ['restaurant', 'fast_food', 'cafe', 'bar', 'ice_cream', 'fast_food','bar', 'food_court', 'club', 'drinking_water']
     market_list = ['marketplace', 'internet_cafe']
     bank_list = ['atm', 'bank', ]
@@ -170,7 +200,7 @@ def amenity_df(df):
     fuel_list = ['fuel', 'fire_station']
     others_list = ['post_box', 'community_centre', 'post_office', 'embassy', 'police', 'bus_station', 'public_building',
                 'taxi']
-# ---
+    
     amenity_list = ['food_list', 'market_list', 'bank_list', 'toilets_list', 'education_list', 
     'hospital_list', 'parking_list', 'entertainment_list', 'worship_list', 'fuel_list', 'others_list']
     food,market,bank,toilets,education,hospital,parking,entertainment,worship,fuel,others = [],[],[],[],[],[],[],[],[],[],[]
@@ -234,6 +264,21 @@ def top5(dx,ilocation):
     polygon = [i for i in polygon if i is not None]
 
     map_osm = folium.Map(location=coords12[0])
+    #Add Plugins
+    # add tiles to map, Create a tile layer to append on a Map
+    folium.raster_layers.TileLayer('Open Street Map').add_to(map_osm)
+    folium.raster_layers.TileLayer('Stamen Terrain').add_to(map_osm)
+    folium.raster_layers.TileLayer('Stamen Toner').add_to(map_osm)
+    folium.raster_layers.TileLayer('Stamen Watercolor').add_to(map_osm)
+    folium.raster_layers.TileLayer('CartoDB Positron').add_to(map_osm)
+    folium.raster_layers.TileLayer('CartoDB Dark_Matter').add_to(map_osm)
+    # add layer control to show different maps
+    folium.LayerControl().add_to(map_osm)
+    minimap = plugins.MiniMap(toggle_display=True)
+    # add minimap to map
+    map_osm.add_child(minimap)
+    # add full screen button to map
+    plugins.Fullscreen(position='topright').add_to(map_osm)
     # create a polygon with the coordinates
     for cords in coords12:
         folium.CircleMarker(location=[cords[0], cords[1]],radius=2,weight=1).add_to(map_osm)

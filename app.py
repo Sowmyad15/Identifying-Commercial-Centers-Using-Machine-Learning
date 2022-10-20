@@ -3,22 +3,61 @@ import streamlit as st
 from cluster_model import *
 from streamlit_folium import folium_static
 
+#reducing heading space
 
-st.header("Identifying Commercial Centers")
-st.markdown("This project focuses on identifying commercial centers")
+#SET PAGE WIDE
+st.set_page_config(page_title='Identifying Commercial Centre Using Machine Learning',layout="centered")
 
-city = st.text_input('Enter City Name:')
+
+st.markdown("""
+        <style>
+               .css-18e3th9 {
+                    padding-top: 0rem;
+                    padding-bottom: 10rem;
+                    padding-left: 5rem;
+                    padding-right: 5rem;
+                }
+               .css-1d391kg {
+                    padding-top: 3.5rem;
+                    padding-right: 1rem;
+                    padding-bottom: 3.5rem;
+                    padding-left: 1rem;
+                }
+        </style>
+        """, unsafe_allow_html=True)
+
+
+#Title of the page with CSS
+
+st.markdown(""" <style> .font {
+        font-size:40px ; font-family: 'Verdana'; color: 	#000000;} 
+        </style> """, unsafe_allow_html=True)
+st.markdown('<p class="font">Identifying Commercial Centers</p>', unsafe_allow_html=True) 
+
+with st.expander("About"):
+    st.write("""Even though several global data are available regarding geolocations, demography of the planet, they are of not in supervised structure from which insights cannot be drawn. A Commercial Centre contains a high concentration of business, civic and cultural activities, also known as downtown. It is important to get to know the commercial city centres if you want to start any business as it also helps in identifying customer needs and in developing your business too.
+To identify commercial centre of any city, clustering of Point of Interest(POI) of the city data with the correct amenities of interest is needed. 
+This web app provides the Commercial centre of the city using Machine Learning.
+ """)
+
+city = st.text_input('Enter City Name:',help="City name is case sensitive, Kindly provide the exact name")
+
 if city:
         with st.spinner("Fetching City Data"):
             try:
                 df=fetch_city_data(city)
 
-                st.header("Commercial Centers In "+city)
-                st.markdown("The following data represents the commercial centers in "+city)
-                st.dataframe(df,width=725,height=500)
+                st.header("Point of Interest in "+city)
+                st.markdown("The following data represents the Point of Interest Data of "+city)
+                st.dataframe(df,width=1000,height=500,use_container_width=True)
                 x=cluster_models(df)
-                st.markdown("Point Of Interest of "+city)
-                folium_static(mapplot(x[0],x[1],x[2]),width=725,height=500)
+                with st.expander("How it works?"):
+                    st.write("""A city from user is taken, whose data is fetched from Open Street Map (OSM), 
+                    after pre-processing the data, outliers are removed using Density-Based Spatial Clustering of Applications with Noise (DBSCAN) and 
+                    clusters are plotted on map using K-Means.Along with identifying the commercial centre, it also forms clusters of top 5 amenities in the city too.""")
+
+                st.header("Commercial Centers in "+city)
+                folium_static(mapplot(x[0],x[1],x[2]),height=500)
 
                 dx=amenity_df(df)
 

@@ -26,7 +26,20 @@ st.markdown("""
         </style>
         """, unsafe_allow_html=True)
 
+st.sidebar.title("About")
+st.sidebar.info(
+    """
+    GitHub repository: <https://github.com/Sowmyad15/Identifying-Commercial-Centers-Using-Machine-Learning>
+    """
+)
 
+st.sidebar.title("Contact")
+st.sidebar.info(
+    """
+    Sowmya D
+    [GitHub](https://github.com/Sowmyad15) | [LinkedIn](https://www.linkedin.com/in/sowmya-d-4b01711b2/)
+    """
+)
 #Title of the page with CSS
 
 st.markdown(""" <style> .font {
@@ -34,8 +47,8 @@ st.markdown(""" <style> .font {
         </style> """, unsafe_allow_html=True)
 st.markdown('<p class="font">Identifying Commercial Centers</p>', unsafe_allow_html=True) 
 
-with st.expander("About"):
-    st.write("""Even though several global data are available regarding geolocations, demography of the planet, they are of not in supervised structure from which insights cannot be drawn. A Commercial Centre contains a high concentration of business, civic and cultural activities, also known as downtown. It is important to get to know the commercial city centres if you want to start any business as it also helps in identifying customer needs and in developing your business too.
+with st.expander("About this project"):
+    st.info("""Even though several global data are available regarding geolocations, demography of the planet, they are of not in supervised structure from which insights cannot be drawn. A Commercial Centre contains a high concentration of business, civic and cultural activities, also known as downtown. It is important to get to know the commercial city centres if you want to start any business as it also helps in identifying customer needs and in developing your business too.
 To identify commercial centre of any city, clustering of Point of Interest(POI) of the city data with the correct amenities of interest is needed. 
 This web app provides the Commercial centre of the city using Machine Learning.
  """)
@@ -52,7 +65,7 @@ if city:
                 st.dataframe(df,width=1000,height=500,use_container_width=True)
                 x=cluster_models(df)
                 with st.expander("How it works?"):
-                    st.write("""A city from user is taken, whose data is fetched from Open Street Map (OSM), 
+                    st.success("""A city from user is taken, whose data is fetched from Open Street Map (OSM), 
                     after pre-processing the data, outliers are removed using Density-Based Spatial Clustering of Applications with Noise (DBSCAN) and 
                     clusters are plotted on map using K-Means.Along with identifying the commercial centre, it also forms clusters of top 5 amenities in the city too.""")
 

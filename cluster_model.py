@@ -1,6 +1,5 @@
 import pandas as pd
 import numpy as np
-import json
 import overpy
 from sklearn.cluster import KMeans,DBSCAN
 from convex_hull import *

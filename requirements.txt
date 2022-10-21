@@ -1,0 +1,12 @@
+branca==0.5.0
+pandas==1.4.4
+streamlit==1.13.0
+streamlit-folium==0.6.15
+numpy==1.23.2
+overpy==0.6
+sklearn==0.0
+plotly==5.10.0
+folium==0.12.1.post1
+streamlit-folium==0.6.15
+
+

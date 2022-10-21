@@ -29,7 +29,7 @@ st.markdown("""
 st.sidebar.title("About")
 st.sidebar.info(
     """
-    GitHub repository: <https://github.com/Sowmyad15/Identifying-Commercial-Centers-Using-Machine-Learning>
+    GitHub repository: [Identifying-Commercial-Centers-Using-Machine-Learning](https://github.com/Sowmyad15/Identifying-Commercial-Centers-Using-Machine-Learning)
     """
 )
 

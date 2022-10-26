@@ -18,7 +18,8 @@ def fetch_city_data(city_name):
    
     res = api.query(f"""[out:json];
     area[name='{city_name}'][boundary=administrative]->.searchArea;
-    (node["amenity"](area.searchArea);
+    (node[place=city](area.searchArea);
+    node["amenity"](area.searchArea);
     way["amenity"](area.searchArea);
         relation["amenity"](area.searchArea);
         );

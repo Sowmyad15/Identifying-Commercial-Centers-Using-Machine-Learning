@@ -53,7 +53,7 @@ To identify commercial centre of any city, clustering of Point of Interest(POI) 
 This web app provides the Commercial centre of the city using Machine Learning.
  """)
 
-city = st.text_input('Enter City Name:',help="City name is case sensitive, Kindly provide the exact name")
+city = st.text_input('Enter City Name:',help="City name is case sensitive, Kindly provide the exact name as in OSM")
 
 if city:
         with st.spinner("Fetching City Data"):

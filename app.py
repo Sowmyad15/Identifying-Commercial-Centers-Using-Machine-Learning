@@ -102,23 +102,23 @@ if city:
 
                 with tab2:
                     st.header(top5name[0])
-                    folium_static(top5(dx,0),width=725,height=500)
+                    folium_static(top5(city_amenity,0),width=725,height=500)
 
                 with tab3:
                     st.header(top5name[1])
-                    folium_static(top5(dx,1),width=725,height=500)
+                    folium_static(top5(city_amenity,1),width=725,height=500)
 
                 with tab4:
                     st.header(top5name[2])
-                    folium_static(top5(dx,2),width=725,height=500)
+                    folium_static(top5(city_amenity,2),width=725,height=500)
 
                 with tab5:
                     st.header(top5name[3])
-                    folium_static(top5(dx,3),width=725,height=500)
+                    folium_static(top5(city_amenity,3),width=725,height=500)
 
                 with tab6:
                     st.header(top5name[4])
-                    folium_static(top5(dx,4),width=725,height=500)
+                    folium_static(top5(city_amenity,4),width=725,height=500)
 
             except KeyError:
                 st.error("Oops Couldnt find city details")

@@ -5,6 +5,8 @@ from sklearn.cluster import KMeans,DBSCAN
 from convex_hull import *
 import config
 from maplegend import *
+from sklearn import metrics
+from sklearn.metrics import pairwise_distances
 
 import plotly.express as px
 import folium
@@ -40,8 +42,8 @@ def reduce(res):
             i_tags['lat'] = float(i.lat)
             i_tags['lon'] = float(i.lon)
             tags.append(i.tags)
-    df = pd.DataFrame(tags)
-    df = df[['node_id', 'lat', 'lon', 'name', 'amenity']]
+    df = pd.DataFrame(tags) #Convert JSON to DataFrame
+    df = df[['node_id', 'lat', 'lon', 'name', 'amenity']]   #Select only the necessary columns
     df = df.dropna(subset=['node_id', 'lat', 'amenity'])
     remove_amenity =  [
     'arts_centre',
@@ -81,68 +83,63 @@ def reduce(res):
     "waste_transfer_station",
     "water_point",
     "weighbridge",]
+    #Removing unnecessary amenity
     for val in remove_amenity:
         df = df[df.amenity != val]
     df.name = np.where(df.name.isnull(), df.amenity, df.name)
     return df
 
-def locplot(df):
-    coords1=df[['lat','lon']].to_numpy()
-    map_osm = folium.Map(location=coords1[0])
-    # create a polygon with the coordinates
-    for cords in coords1:
-        folium.CircleMarker(location=[cords[0], cords[1]],radius=2,weight=2).add_to(map_osm)
-    return map_osm
-
+#Call the cluster models
 def cluster_models(data):
-    db_return = dbscan(data)
-    df =db_return[0]
+    db_return = outlier_dbscan(data)  #DBSCAN to remove outliers, returns df and no. of clusters
+    df =db_return[0]  
     n_cluster=db_return[1]
-    knn_return=Kmeans(df,n_cluster)
-    return cluster_coords(knn_return)
+    km_return=cluster_Kmeans(df,n_cluster) #Returns no.of clusters
+    return clusters_convex(km_return)
 
-def dbscan(data):
+def outlier_dbscan(data):
     x=data.copy()
-    coords = x[['lat', 'lon']].to_numpy()
+    coords = x[['lat', 'lon']].to_numpy() #converts lat,lon columns of df to numpy
     dbsc = (DBSCAN(eps=config.epsilon,min_samples=config.min_samples, algorithm='ball_tree', metric='haversine').fit(np.radians(coords)))
     cluster_labels = dbsc.labels_
-    num_clusters = len(set(cluster_labels))
+    num_clusters = len(set(cluster_labels))     #Number of clusters formed by dbscan
     clusters = pd.Series([ coords[ cluster_labels == n ] for n in range (num_clusters) ])
     core_samples = np.zeros_like(cluster_labels, dtype='bool')
     core_samples[dbsc.core_sample_indices_] = True
     s = pd.Series(core_samples, name='bools')
-    df=[x[s.values],num_clusters,clusters]
-    return df
+    dbscan_return=[x[s.values],num_clusters] #Contains df after removal of outlier and num_clusters
+    return dbscan_return
     
-def Kmeans(data, num_clusters):
+def cluster_Kmeans(data, num_clusters):
     x=data.copy()
-    coords1=x[['lat','lon']].to_numpy()
+    coords=x[['lat','lon']].to_numpy()
     kmeans = KMeans(num_clusters, init = 'k-means++', random_state = config.random_state)
-    y_kmeans = kmeans.fit_predict(coords1)
-    km=[num_clusters,coords1,y_kmeans,data]
+    y_kmeans = kmeans.fit_predict(coords) #form clusters using kmeans
+    km=[num_clusters,coords,y_kmeans,data]
     return km
 
 
-def cluster_coords(Kn):
-    num_clusters=Kn[0]
-    coords1=Kn[1]
-    y_kmeans=Kn[2]
-    df=Kn[3]
+def clusters_convex(km_return):
+    num_clusters=km_return[0] #no.of clusters
+    coords=km_return[1] #Coords (lat,lon)
+    y_kmeans=km_return[2] #KMeans Clusters
+    df=km_return[3] #dataframe 
     most_significant = []
     least_significant = []
     for i in range(num_clusters):
-        if len(coords1[y_kmeans == i]) > 5:
-            if len(coords1[y_kmeans == i]) > 45:
-                most_significant.append(apply_convex_hull(coords1[y_kmeans == i]))
+        if len(coords[y_kmeans == i]) > 5:
+            if len(coords[y_kmeans == i]) > 45: #If len of coords in the cluster >45 then the cluster is appended to most_significant else to least_significant
+                most_significant.append(apply_convex_hull(coords[y_kmeans == i])) # apply convex hull to the clutser, results in a polygon
             else:
-                least_significant.append(apply_convex_hull(coords1[y_kmeans == i]))
+                least_significant.append(apply_convex_hull(coords[y_kmeans == i]))
     
-    return most_significant,least_significant,coords1
+    return most_significant,least_significant,coords
 
 
 
-def mapplot(most_significant,least_significant,coords1):
-    map_osm = folium.Map(location=coords1[0])
+def mapplot(most_significant,least_significant,coords):
+    #Creat a Map
+    map_osm = folium.Map(location=coords[0])
     #Add Plugins
     # add tiles to map, Create a tile layer to append on a Map
     folium.raster_layers.TileLayer('Open Street Map').add_to(map_osm)
@@ -159,8 +156,10 @@ def mapplot(most_significant,least_significant,coords1):
     # add full screen button to map
     plugins.Fullscreen(position='topright').add_to(map_osm)
     # create a polygon with the coordinates
-    for cords in coords1:
+    for cords in coords:
         folium.CircleMarker(location=[cords[0], cords[1]],radius=1,color='blue').add_to(map_osm)
+
+    #Color the polygon that are least significant with yellow
     for i in range(len(least_significant)):
         folium.Polygon(least_significant[i],
                color="blue",
@@ -169,6 +168,7 @@ def mapplot(most_significant,least_significant,coords1):
                fill_color="yellow",
                fill_opacity=0.4).add_to(map_osm)
 
+     #Color the polygon that are most significant with yellow
     for i in range(len(most_significant)):
         folium.Polygon(most_significant[i],
                color="black",
@@ -225,26 +225,29 @@ def amenity_df(df):
     for i,item in enumerate(amenities_list):
         x.append(len(item))
 
-    dx=pd.DataFrame(list(zip(amenities_str,amenities_list,x)),columns=['Amenity','lat_lon','Count']).sort_values(by=['Count'],ascending=False)
+    #Create df  that has amenity along with  their count in ascending
+    df=pd.DataFrame(list(zip(amenities_str,amenities_list,x)),columns=['Amenity','lat_lon','Count']).sort_values(by=['Count'],ascending=False)
 
-    return dx
+    return df
 
-def barplot(dx):
-    dx_plot=dx[['Amenity','Count']]
+def barplot(df):
+    dx_plot=df[['Amenity','Count']]
 
+    #Create bar plot for Amenity-Count
     fig = px.bar(dx_plot, x='Amenity', y='Count',color='Count',width=725,height=500)
 
     return fig
 
-def top5(dx,ilocation):
+def top5(df,ilocation):
 
-    dx=dx.head(5)
+    #Get the top 5 amenity
+    df=df.head(5)
 
-    amenity_name = dx.iloc[ilocation,0]
-    amenity_array = dx.iloc[ilocation,1]
+    amenity_name = df.iloc[ilocation,0] #Contain Amenity name
+    amenity_array = df.iloc[ilocation,1]    #Contain amenity coordinates
 
     amenities_df = pd.DataFrame(amenity_array, columns = ['lat', 'lon'])
-    coords12=amenities_df[['lat','lon']].to_numpy()
+    coords_amenity=amenities_df[['lat','lon']].to_numpy()
 
     # Fitting K-Means to the dataset
     if len(amenity_array) < 60: 
@@ -263,7 +266,8 @@ def top5(dx,ilocation):
 
     polygon = [i for i in polygon if i is not None]
 
-    map_osm = folium.Map(location=coords12[0])
+    #Create map for the amenity
+    map_osm = folium.Map(location=coords_amenity[0])
     #Add Plugins
     # add tiles to map, Create a tile layer to append on a Map
     folium.raster_layers.TileLayer('Open Street Map').add_to(map_osm)
@@ -280,12 +284,12 @@ def top5(dx,ilocation):
     # add full screen button to map
     plugins.Fullscreen(position='topright').add_to(map_osm)
     # create a polygon with the coordinates
-    for cords in coords12:
+    for cords in coords_amenity:
         folium.CircleMarker(location=[cords[0], cords[1]],radius=2,weight=1).add_to(map_osm)
 
     for i in range(len(polygon)):
         folium.Polygon(polygon[i],
-               color="blue",
+               color="black",
                weight=2,
                fill=True,
                fill_color="yellow",

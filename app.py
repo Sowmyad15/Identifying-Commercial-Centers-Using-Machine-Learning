@@ -26,6 +26,7 @@ st.markdown("""
         </style>
         """, unsafe_allow_html=True)
 
+#About and Contact
 st.sidebar.title("About")
 st.sidebar.info(
     """
@@ -53,31 +54,46 @@ To identify commercial centre of any city, clustering of Point of Interest(POI) 
 This web app provides the Commercial centre of the city using Machine Learning.
  """)
 
+#Get city name from user
 city = st.text_input('Enter City Name:',help="City name is case sensitive, Kindly provide the exact name as in OSM")
+
 
 if city:
         with st.spinner("Fetching City Data"):
             try:
-                df=fetch_city_data(city)
+                #call fetch_city_data(), that fetches the city data and returns it in dataframe
+
+                city_data=fetch_city_data(city)
 
                 st.header("Point of Interest in "+city)
                 st.markdown("The following data represents the Point of Interest Data of "+city)
-                st.dataframe(df,width=1000,height=500,use_container_width=True)
-                x=cluster_models(df)
+
+                #Display the city_data df to the user
+                st.dataframe(city_data,width=1000,height=500,use_container_width=True)
+
+                #Cluster of amenities
+                x=cluster_models(city_data)
+
                 with st.expander("How it works?"):
                     st.success("""A city from user is taken, whose data is fetched from Open Street Map (OSM), 
                     after pre-processing the data, outliers are removed using Density-Based Spatial Clustering of Applications with Noise (DBSCAN) and 
                     clusters are plotted on map using K-Means.Along with identifying the commercial centre, it also forms clusters of top 5 amenities in the city too.""")
 
                 st.header("Commercial Centers in "+city)
+                
+                #Plot the clutsers in map
                 folium_static(mapplot(x[0],x[1],x[2]),height=500)
 
-                dx=amenity_df(df)
+                #get the amenities in the city
+                city_amenity=amenity_df(city_data)
 
-                top5name=list(dx.iloc[:,0])
+                #Get the top5 amenities,and cluster of the same
+                top5name=list(city_amenity.iloc[:,0])
 
-                barplt=barplot(dx)
+                #Plot the amenity using barplot
+                barplt=barplot(city_amenity)
 
+                #Tabs containing the amenity bar plot and cluster of top 5 amenities 
                 tab1, tab2,tab3,tab4,tab5,tab6= st.tabs(["📈 Chart",top5name[0],top5name[1],top5name[2],top5name[3],top5name[4]])
 
                 with tab1:

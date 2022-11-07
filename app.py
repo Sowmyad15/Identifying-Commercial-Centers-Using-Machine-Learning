@@ -88,7 +88,7 @@ if city:
                 city_amenity=amenity_df(city_data)
 
                 #Get the top5 amenities,and cluster of the same
-                top5name=list(city_amenity.iloc[:,0])
+                top5name=list(city_amenity.iloc[0:5,0])
 
                 #Plot the amenity using barplot
                 barplt=barplot(city_amenity)

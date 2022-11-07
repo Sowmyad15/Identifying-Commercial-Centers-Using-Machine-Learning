@@ -178,7 +178,7 @@ def mapplot(most_significant,least_significant,coords):
 
     #Legend
     
-    macro=temp()
+    macro=add_map_legend()
 
     map_osm.add_child(macro)
 

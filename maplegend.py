@@ -1,5 +1,5 @@
 from branca.element import Template, MacroElement
-def temp():
+def add_map_legend():
   #code copied from: https://nbviewer.org/gist/talbertc-usgs/18f8901fc98f109f2b71156cf3ac81cd
   template = """
   {% macro html(this, kwargs) %}

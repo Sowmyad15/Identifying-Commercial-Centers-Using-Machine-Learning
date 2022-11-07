@@ -283,7 +283,7 @@ def top5(df,ilocation):
     plugins.Fullscreen(position='topright').add_to(amenity_map_osm)
     # create a polygon with the coordinates
     for cords in coords_amenity:
-        folium.CircleMarker(location=[cords[0], cords[1]],radius=1,weight=1).add_to(amenity_map_osm)
+        folium.CircleMarker(location=[cords[0], cords[1]],radius=1,color='red').add_to(amenity_map_osm)
 
     for i in range(len(polygon)):
         folium.Polygon(polygon[i],

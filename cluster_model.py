@@ -278,12 +278,12 @@ def top5(df,ilocation):
     folium.LayerControl().add_to(amenity_map_osm)
     minimap = plugins.MiniMap(toggle_display=True)
     # add minimap to map
-    map_osm.add_child(minimap)
+    amenity_map_osm.add_child(minimap)
     # add full screen button to map
     plugins.Fullscreen(position='topright').add_to(amenity_map_osm)
     # create a polygon with the coordinates
     for cords in coords_amenity:
-        folium.CircleMarker(location=[cords[0], cords[1]],radius=2,weight=1).add_to(map_osm)
+        folium.CircleMarker(location=[cords[0], cords[1]],radius=1,weight=1).add_to(amenity_map_osm)
 
     for i in range(len(polygon)):
         folium.Polygon(polygon[i],

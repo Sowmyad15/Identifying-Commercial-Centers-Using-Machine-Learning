@@ -5,8 +5,6 @@ from sklearn.cluster import KMeans,DBSCAN
 from convex_hull import *
 import config
 from maplegend import *
-from sklearn import metrics
-from sklearn.metrics import pairwise_distances
 
 import plotly.express as px
 import folium
@@ -30,10 +28,10 @@ def fetch_city_data(city_name):
     );
     out;
     """)
-    return reduce(res)
+    return df_preprocess(res)
 
 #Remove unnecessary amenity
-def reduce(res):
+def df_preprocess(res):
     tags = []
     for i in res.nodes:
         if len(i.tags) != 0:
@@ -97,6 +95,7 @@ def cluster_models(data):
     km_return=cluster_Kmeans(df,n_cluster) #Returns no.of clusters
     return clusters_convex(km_return)
 
+#DBSCAN to remove outliers and get num_clusters
 def outlier_dbscan(data):
     x=data.copy()
     coords = x[['lat', 'lon']].to_numpy() #converts lat,lon columns of df to numpy
@@ -185,7 +184,7 @@ def mapplot(most_significant,least_significant,coords):
 
     return map_osm
 
-def amenity_df(df):
+def amenity_df(city_data):
     #Group the amenity
     food_list = ['restaurant', 'fast_food', 'cafe', 'bar', 'ice_cream', 'fast_food','bar', 'food_court', 'club', 'drinking_water']
     market_list = ['marketplace', 'internet_cafe']
@@ -240,11 +239,10 @@ def barplot(df):
 
 def top5(df,ilocation):
 
-    #Get the top 5 amenity
-    df=df.head(5)
+    #'df' Contains 'Amenity','lat_lon','Count' column
 
     amenity_name = df.iloc[ilocation,0] #Contain Amenity name
-    amenity_array = df.iloc[ilocation,1]    #Contain amenity coordinates
+    amenity_array = df.iloc[ilocation,1]    #Contain Amenity coordinates
 
     amenities_df = pd.DataFrame(amenity_array, columns = ['lat', 'lon'])
     coords_amenity=amenities_df[['lat','lon']].to_numpy()
@@ -267,22 +265,22 @@ def top5(df,ilocation):
     polygon = [i for i in polygon if i is not None]
 
     #Create map for the amenity
-    map_osm = folium.Map(location=coords_amenity[0])
+    amenity_map_osm = folium.Map(location=coords_amenity[0])
     #Add Plugins
     # add tiles to map, Create a tile layer to append on a Map
-    folium.raster_layers.TileLayer('Open Street Map').add_to(map_osm)
-    folium.raster_layers.TileLayer('Stamen Terrain').add_to(map_osm)
-    folium.raster_layers.TileLayer('Stamen Toner').add_to(map_osm)
-    folium.raster_layers.TileLayer('Stamen Watercolor').add_to(map_osm)
-    folium.raster_layers.TileLayer('CartoDB Positron').add_to(map_osm)
-    folium.raster_layers.TileLayer('CartoDB Dark_Matter').add_to(map_osm)
+    folium.raster_layers.TileLayer('Open Street Map').add_to(amenity_map_osm)
+    folium.raster_layers.TileLayer('Stamen Terrain').add_to(amenity_map_osm)
+    folium.raster_layers.TileLayer('Stamen Toner').add_to(amenity_map_osm)
+    folium.raster_layers.TileLayer('Stamen Watercolor').add_to(amenity_map_osm)
+    folium.raster_layers.TileLayer('CartoDB Positron').add_to(amenity_map_osm)
+    folium.raster_layers.TileLayer('CartoDB Dark_Matter').add_to(amenity_map_osm)
     # add layer control to show different maps
-    folium.LayerControl().add_to(map_osm)
+    folium.LayerControl().add_to(amenity_map_osm)
     minimap = plugins.MiniMap(toggle_display=True)
     # add minimap to map
     map_osm.add_child(minimap)
     # add full screen button to map
-    plugins.Fullscreen(position='topright').add_to(map_osm)
+    plugins.Fullscreen(position='topright').add_to(amenity_map_osm)
     # create a polygon with the coordinates
     for cords in coords_amenity:
         folium.CircleMarker(location=[cords[0], cords[1]],radius=2,weight=1).add_to(map_osm)
@@ -293,8 +291,8 @@ def top5(df,ilocation):
                weight=2,
                fill=True,
                fill_color="yellow",
-               fill_opacity=0.4).add_to(map_osm)
+               fill_opacity=0.4).add_to(amenity_map_osm)
 
-    return map_osm
+    return amenity_map_osm
 
 

@@ -72,7 +72,7 @@ if city:
                 st.dataframe(city_data,width=1000,height=500,use_container_width=True)
 
                 #Cluster of amenities
-                x=cluster_models(city_data)
+                map_clusters=cluster_models(city_data)
 
                 with st.expander("How it works?"):
                     st.success("""A city from user is taken, whose data is fetched from Open Street Map (OSM), 
@@ -82,7 +82,7 @@ if city:
                 st.header("Commercial Centers in "+city)
                 
                 #Plot the clutsers in map
-                folium_static(mapplot(x[0],x[1],x[2]),height=500)
+                folium_static(mapplot(map_clusters[0],map_clusters[1],map_clusters[2]),height=500)
 
                 #get the amenities in the city
                 city_amenity=amenity_df(city_data)

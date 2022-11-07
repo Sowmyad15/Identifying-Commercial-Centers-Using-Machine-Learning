@@ -204,7 +204,7 @@ def amenity_df(city_data):
     'hospital_list', 'parking_list', 'entertainment_list', 'worship_list', 'fuel_list', 'others_list']
     food,market,bank,toilets,education,hospital,parking,entertainment,worship,fuel,others = [],[],[],[],[],[],[],[],[],[],[]
 
-    for value in df.values:
+    for value in city_data.values:
         if value[4] in food_list:     food.append([value[1], value[2]])
         elif value[4] in market_list:     market.append([value[1], value[2]])    
         elif value[4] in bank_list:     bank.append([value[1], value[2]])    

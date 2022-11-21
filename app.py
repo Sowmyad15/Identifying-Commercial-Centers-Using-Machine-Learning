@@ -25,15 +25,6 @@ st.markdown("""
                 }
         </style>
         """, unsafe_allow_html=True)
-st.markdown(
-   f"""
-   <style>
-   p {
-   background-image: url(‘https://images.unsplash.com/photo-1618340338709-027f57b98a16?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8OHx8Y2l0eSUyMGJhY2tncm91bmR8ZW58MHx8MHx8&auto=format&fit=crop&w=600&q=60’);
-   }
-   </style>
-   """,
-   unsafe_allow_html=True)
 
 #About and Contact
 st.sidebar.title("About")

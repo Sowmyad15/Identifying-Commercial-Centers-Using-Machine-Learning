@@ -26,13 +26,13 @@ st.markdown("""
         </style>
         """, unsafe_allow_html=True)
 st.markdown(
-   f”””
+   f"""
    <style>
    p {
    background-image: url(‘https://i.pinimg.com/600x315/12/df/07/12df07519f4895ae7183f425d43ed389.jpg’);
    }
    </style>
-   ”””,
+   """,
    unsafe_allow_html=True)
 
 #About and Contact

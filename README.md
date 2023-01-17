@@ -33,3 +33,5 @@ A city from user is taken, whose data is fetched from Open Street Map (OSM),afte
 •	**map_legend.py**- It contains draggable legend macro that can be added to the map.
 
 Here, is the Streamlit app for [Identifying Commercial Centres Using Machine Learning](https://identifying-commercial-centres-using-ml.streamlit.app/)
+
+![](https://github.com/Sowmyad15/Identifying-Commercial-Centers-Using-Machine-Learning/blob/main/ipl_score_predictor.gif)
